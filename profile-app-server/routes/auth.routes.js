@@ -118,6 +118,44 @@ router.post("/login", (req, res, next) => {
     .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
 });
 
+
+
+router.put('/:userId', isAuthenticated, async (req, res) => {
+  const { userId } = req.params;
+  const { username, password, email, name, photo } = req.body;
+
+  if (req.payload._id !== userId) {
+    return res.status(403).send("You can only update your own profile.");
+  }
+
+  try {
+    const updateData = { username, email, name, photo };
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      updateData.password = hashedPassword;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found.");
+    }
+
+    // Omitting the password and other sensitive information from the response
+    const { password: _, ...userWithoutPassword } = updatedUser.toObject();
+    
+    res.json(userWithoutPassword);
+  } catch (error) {
+    res.status(500).send("An error occurred while updating the user.");
+  }
+});
+
+module.exports = router;
+
+
+
 // GET  /auth/verify  -  Used to verify JWT stored on the client
 router.get("/verify", isAuthenticated, (req, res, next) => {
   // If JWT token is valid the payload gets decoded by the
