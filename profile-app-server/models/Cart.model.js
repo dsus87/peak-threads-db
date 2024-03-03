@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Schema, model } = mongoose;
 
 const cartSchema = new mongoose.Schema({
   buyerId: {
@@ -23,13 +24,13 @@ const cartSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
       required: true,
+        // Many-to-Many relationship: An order can include many products.
     },
     quantity: {
       type: Number,
       required: true,
     },
   }],
-  // Many-to-Many relationship: An order can include many products.
   totalPrice: {
     type: Number,
     required: true,
@@ -42,4 +43,5 @@ const cartSchema = new mongoose.Schema({
   },
 });
 
-const Cart = mongoose.model('Cart', orderSchema);
+
+module.exports = model("Cart", cartSchema);
