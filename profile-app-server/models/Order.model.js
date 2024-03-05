@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
-const cartSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema({
   buyerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  // Many-to-One relationship: Many orders can reference one User.
   orderDate: {
     type: Date,
     default: Date.now,
@@ -24,24 +23,26 @@ const cartSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
       required: true,
-        // Many-to-Many relationship: An order can include many products.
     },
     quantity: {
       type: Number,
       required: true,
     },
+    size: {
+      type: String,
+      required: true,
+      enum: ['S', 'M', 'L'],
+    }
   }],
   totalPrice: {
     type: Number,
     required: true,
   },
-  orderStatus: {
-    type: String,
-    enum: ['In Cart', 'Paid'],
-    default: 'In Cart',
-    required: true,
+  paymentDetails: {
+    method: { type: String, required: true }, 
+    status: { type: String, enum: ['Paid', 'Pending', 'Failed'], required: true },
+    transactionId: { type: String, required: false },
   },
 });
 
-
-module.exports = model("Cart", cartSchema);
+module.exports = model("Order", orderSchema);

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { v4: uuidv4 } = require('uuid');
+
 // ℹ️ Handles password encryption
 const bcrypt = require("bcrypt");
 
@@ -12,8 +14,8 @@ const User = require("../models/User.model.js")
 const Product = require("../models/Product.model.js")
 //const Cart = require("../models/Cart.model.js")
 
-// Require necessary (isAuthenticated) middleware in order to control access to specific routes
-const { isAuthenticated } = require("../middleware/jwt.middleware.js");
+const { isAuthenticated, isGuest, allowAuthenticatedOrGuest } = require("../middleware/jwt.middleware.js");
+
 
 // How many rounds should bcrypt run the salt (default - 10 rounds)
 const saltRounds = 10;
@@ -170,9 +172,13 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
 });
 
 
+// GET Generate a unique guest token
 
-
-
+router.get('/generate-guest-token', (req, res) => {
+  const guestToken = uuidv4();
+  // Send the token back to the client
+  res.json({ guestToken });
+});
 
 
 module.exports = router;

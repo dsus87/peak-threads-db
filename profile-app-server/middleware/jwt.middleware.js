@@ -23,7 +23,38 @@ function getTokenFromHeaders(req) {
   return null;
 }
 
-// Export the middleware so that we can use it to create protected routes
-module.exports = {
-  isAuthenticated,
-};
+
+
+// Middleware to check for a guest token
+function isGuest(req, res, next) {
+  const guestToken = req.headers['x-guest-token'];
+  if (guestToken && guestToken === process.env.GUEST_TOKEN) {
+    req.isGuest = true;
+    next();
+  } else {
+    next(); // Proceed without marking as guest, allowing isAuthenticated to run if applicable
+  }
+}
+
+// Combined middleware to allow authenticated users or guests
+function allowAuthenticatedOrGuest(req, res, next) {
+  // First, attempt to authenticate as a user
+  isAuthenticated(req, res, (err) => {
+    if (!err) {
+      // If isAuthenticated succeeds, proceed
+      req.isGuest = false; // Ensure isGuest flag is explicitly set
+      return next();
+    }
+    // If JWT authentication fails, try guest token check
+    isGuest(req, res, (guestErr) => {
+      if (req.isGuest) {
+        // If guest token is valid, proceed
+        return next();
+      }
+      // If neither JWT nor guest token is valid, restrict access
+      return res.status(401).json({ message: "Unauthorized access" });
+    });
+  });
+}
+
+module.exports = { isAuthenticated, isGuest, allowAuthenticatedOrGuest };
