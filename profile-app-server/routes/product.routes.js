@@ -6,9 +6,9 @@ const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 
 
-//  POST /api/userId/products - Retrieves all of the products
+// POST /api/userId/register-product - Allows a registered user to list a new product for sale. Requires seller authentication.
 
-router.post('/:userId/products', isAuthenticated, async (req, res, next) => {
+router.post('/:userId/register-products', isAuthenticated, async (req, res, next) => {
     try {
       const { userId } = req.params;
       const sellerId = req.payload._id;
@@ -20,7 +20,6 @@ router.post('/:userId/products', isAuthenticated, async (req, res, next) => {
 
       const { name, description, price, gender, category, quantity, images, brand } = req.body;
 
-      // Directly create the new product in the database
       const savedProduct = await Product.create({
         name,
         description,
@@ -44,7 +43,7 @@ router.post('/:userId/products', isAuthenticated, async (req, res, next) => {
 // GET /api/products - Retrieves all of the products
 router.get("/products", (req, res, next) => {
     Product.find()
-      .populate('sellerId') // Assuming 'sellerId' is a reference to a User document
+      .populate('sellerId') 
       .then((allProducts) => res.json(allProducts))
       .catch((err) => {
         console.error("Error while getting the products", err);

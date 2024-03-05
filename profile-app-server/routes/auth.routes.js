@@ -9,6 +9,8 @@ const jwt = require("jsonwebtoken");
 
 // Require the User model in order to interact with the database
 const User = require("../models/User.model.js")
+const Product = require("../models/Product.model.js")
+//const Cart = require("../models/Cart.model.js")
 
 // Require necessary (isAuthenticated) middleware in order to control access to specific routes
 const { isAuthenticated } = require("../middleware/jwt.middleware.js");
@@ -119,6 +121,7 @@ router.post("/login", (req, res, next) => {
 });
 
 
+// PUT :userId Updates the user's profile information. This endpoint requires authentication
 
 router.put('/:userId', isAuthenticated, async (req, res) => {
   const { userId } = req.params;
@@ -165,5 +168,11 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
   // Send back the token payload object containing the user data
   res.status(200).json(req.payload);
 });
+
+
+
+
+
+
 
 module.exports = router;
