@@ -13,7 +13,7 @@ module.exports = router;
 
 // POST /products/userId/register-product - Allows a registered user to list a new product for sale. Requires seller authentication.
 
-router.post('/:userId/register-products', isAuthenticated,  upload.single('imageFieldName'), async (req, res, next) => {
+router.post('/:userId/register-products', isAuthenticated,  upload.single('photo'), async (req, res, next) => {
   try {
       const { userId } = req.params;
       const sellerId = req.payload._id;
@@ -25,7 +25,7 @@ router.post('/:userId/register-products', isAuthenticated,  upload.single('image
 
       const { name, description, price, gender, category, quantity, brand } = req.body;
 
-      const images = req.files.map(file => file.path); // Use Cloudinary URL
+      const photo = req.file ? req.file.path : null;  // Use Cloudinary URL
 
       const savedProduct = await Product.create({
         name,
@@ -34,7 +34,7 @@ router.post('/:userId/register-products', isAuthenticated,  upload.single('image
         gender,
         category,
         quantity,
-        images, //Cloudinary URL
+        photo, 
         brand,
         sellerId // Seller ID is obtained from the authenticated user's ID
       });
@@ -79,10 +79,10 @@ router.get('/:productId', async (req, res, next) => {
 
 // PUT /products/update-products/:productId - Updates information for an existing product
 
-router.put('/update-products/:productId', isAuthenticated, async (req, res, next) => {
+router.put('/update-products/:productId', isAuthenticated,  upload.single('photo'),async (req, res, next) => {
   const { productId } = req.params;
   const userId = req.user._id; // Assuming `req.user._id` is set by isAuthenticated middleware and contains the ID of the current user
-  const { name, description, price, gender, category, quantity, images, brand } = req.body;
+  const { name, description, price, gender, category, quantity, photo, brand } = req.body;
 
   try {
       // First, find the product to ensure it exists and is owned by the current user
@@ -98,7 +98,7 @@ router.put('/update-products/:productId', isAuthenticated, async (req, res, next
       product.gender = gender || product.gender;
       product.category = category || product.category;
       product.quantity = quantity || product.quantity;
-      product.images = images || product.images;
+      product.photo = photo || product.photo;
       product.brand = brand || product.brand;
 
       // Save the updated product
