@@ -9,6 +9,8 @@ import {BrowserRouter, Routes, Route} from "react-router-dom";
 import Cancel from './pages/Cancel';
 import Store from './pages/Store';
 import Success from './pages/Success';
+import CartProvider from './context/CartContext';
+
 
 //http://localhost:5173/ -> Home
 
@@ -16,6 +18,7 @@ import Success from './pages/Success';
 function App() {
 
   return (
+    <CartProvider>
     <Container>
       <NavbarComponent> </NavbarComponent>
 
@@ -27,6 +30,7 @@ function App() {
           </Routes>
       </BrowserRouter>
     </Container>
+    </CartProvider>
   );
 }
 
