@@ -5,7 +5,11 @@ const orderSchema = new mongoose.Schema({
   buyerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false, // Make it optional to accommodate orders by guests
+  },
+  guestId: { // Optional identifier for guest users
+    type: String,
+    required: false, // This or buyerId should be provided
   },
   orderDate: {
     type: Date,
@@ -31,6 +35,11 @@ const orderSchema = new mongoose.Schema({
     size: {
       type: String,
       enum: ['S', 'M', 'L'],
+      required: true, // Consider making this required if all products have sizes
+    },
+    priceAtPurchase: {
+      type: Number,
+      required: true, // Capture the price of the product at the time of purchase
     }
   }],
   totalPrice: {
@@ -38,9 +47,16 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
   paymentDetails: {
-    method: { type: String, required: true }, 
+    method: { type: String, required: true },
     status: { type: String, enum: ['Paid', 'Pending', 'Failed'], required: true },
     transactionId: { type: String, required: false },
+  },
+  // Consider adding status to track the overall order status
+  status: {
+    type: String,
+    enum: ['New', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'New',
+    required: true,
   },
 });
 

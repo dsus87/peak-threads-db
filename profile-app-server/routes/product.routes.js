@@ -7,9 +7,7 @@ const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 const upload = require('../middleware/cloudinary.middleware');
 
-// Your routes here, utilizing the `upload` middleware
 
-module.exports = router;
 
 // POST /products/userId/register-product - Allows a registered user to list a new product for sale. Requires seller authentication.
 
@@ -25,6 +23,8 @@ router.post('/:userId/register-products', isAuthenticated,  upload.single('photo
 
       const { name, description, price, gender, category, quantity, brand } = req.body;
 
+      console.log(req.body)
+
       const photo = req.file ? req.file.path : null;  // Use Cloudinary URL
 
       const savedProduct = await Product.create({
@@ -33,7 +33,7 @@ router.post('/:userId/register-products', isAuthenticated,  upload.single('photo
         price,
         gender,
         category,
-        quantity,
+        quantity:{S:quantity,M:quantity,L:quantity},
         photo, 
         brand,
         sellerId // Seller ID is obtained from the authenticated user's ID

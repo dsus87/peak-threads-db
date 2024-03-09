@@ -5,6 +5,12 @@ const { isAuthenticated, isGuest, allowAuthenticatedOrGuest } = require("../midd
 const { updateProductQuantities } = require('../middleware/Order.middleware.js'); 
 
 
+
+
+
+
+
+
 // POST /order - Create a new order
 router.post('/', isAuthenticated,  async (req, res, next) => {
     console.log("Request Body:", req.body);

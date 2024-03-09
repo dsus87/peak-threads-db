@@ -23,8 +23,6 @@ function getTokenFromHeaders(req) {
   return null;
 }
 
-
-
 // Middleware to check for a guest token
 function isGuest(req, res, next) {
   const guestToken = req.headers['x-guest-token'];

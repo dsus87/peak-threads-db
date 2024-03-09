@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema({
     M: { type: Number, default: 0 },
     L: { type: Number, default: 0 },
   },
-  photo: String, // Array of image URLs
+  photo: String,
   brand: {
     type: String,
     required: true,
