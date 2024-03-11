@@ -32,6 +32,9 @@ app.use("/products", productRoutes);
 const orderRoutes = require("./routes/Order.routes");
 app.use("/order", orderRoutes); 
 
+// seperate route for guest users
+
+
 
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
