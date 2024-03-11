@@ -2,50 +2,50 @@ const express = require('express');
 const router = express.Router();
 
 const Product = require('../models/Product.model');
-const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 
 const upload = require('../middleware/cloudinary.middleware');
 
+const { isAuthenticated, isAdmin, isGuest, allowAuthenticatedOrGuest } = require("../middleware/jwt.middleware.js");
 
 
 // POST /products/userId/register-product - Allows a registered user to list a new product for sale. Requires seller authentication.
 
-router.post('/:userId/register-products', isAuthenticated,  upload.single('photo'), async (req, res, next) => {
+router.post('/:userId/register-products', isAuthenticated, isAdmin, upload.single('photo'), async (req, res, next) => {
   try {
-      const { userId } = req.params;
-      const sellerId = req.payload._id;
+    const { userId } = req.params;
+    const sellerId = req.payload._id;
 
-      // Verifying if the authenticated user is the one making the request
-      if (userId !== sellerId.toString()) {
-        return res.status(403).json({ message: "Unauthorized: You can only add products to your own account." });
-      }
-
-      const { name, description, price, gender, category, quantity, brand } = req.body;
-
-      console.log(req.body)
-
-      const photo = req.file ? req.file.path : null;  // Use Cloudinary URL
-
-      const savedProduct = await Product.create({
-        name,
-        description,
-        price,
-        gender,
-        category,
-        quantity:{S:quantity,M:quantity,L:quantity},
-        photo, 
-        brand,
-        sellerId // Seller ID is obtained from the authenticated user's ID
-      });
-
-      // Respond with the newly created product
-      res.status(201).json(savedProduct);
-    } catch (error) {
-      next(error); // Pass errors to the error handling middleware
+    if (userId !== sellerId.toString()) {
+      return res.status(403).json({ message: "Unauthorized: You can only add products to your own account." });
     }
-});
 
+    const { name, description, price, gender, category, brand, 'quantity[S]': quantityS, 'quantity[M]': quantityM, 'quantity[L]': quantityL } = req.body;
+
+    const photo = req.file ? req.file.path : null;
+
+    // Create the product with the separated quantities
+    const savedProduct = await Product.create({
+      name,
+      description,
+      price,
+      gender,
+      category,
+      quantity: {
+        S: quantityS || 0, // Use || 0 to provide a default value of 0 if not specified
+        M: quantityM || 0,
+        L: quantityL || 0,
+      },
+      photo,
+      brand,
+      sellerId,
+    });
+
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // GET /products/products - Retrieves all of the products
 router.get("/products", (req, res, next) => {

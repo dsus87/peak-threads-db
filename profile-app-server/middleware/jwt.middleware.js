@@ -23,6 +23,17 @@ function getTokenFromHeaders(req) {
   return null;
 }
 
+// isAdmin middleware
+const isAdmin = (req, res, next) => {
+  console.log(req.payload); 
+  if (req.payload && req.payload.isAdmin) {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Admin rights required." });
+  }
+};
+
+
 // Middleware to check for a guest token
 function isGuest(req, res, next) {
   const guestToken = req.headers['x-guest-token'];
@@ -55,4 +66,4 @@ function allowAuthenticatedOrGuest(req, res, next) {
   });
 }
 
-module.exports = { isAuthenticated, isGuest, allowAuthenticatedOrGuest };
+module.exports = { isAuthenticated, isAdmin, isGuest, allowAuthenticatedOrGuest };

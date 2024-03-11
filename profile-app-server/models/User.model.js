@@ -21,6 +21,12 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   photo: String,
+  
+  isAdmin: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 });
 
 module.exports = model("User", userSchema);

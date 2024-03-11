@@ -16,7 +16,7 @@ const User = require("../models/User.model.js")
 const Product = require("../models/Product.model.js")
 //const Cart = require("../models/Cart.model.js")
 
-const { isAuthenticated, isGuest, allowAuthenticatedOrGuest } = require("../middleware/jwt.middleware.js");
+const { isAuthenticated, isAdmin, isGuest, allowAuthenticatedOrGuest } = require("../middleware/jwt.middleware.js");
 
 
 // How many rounds should bcrypt run the salt (default - 10 rounds)
@@ -84,51 +84,52 @@ router.post("/signup", (req, res, next) => {
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
 
-  // Check if email or password are provided as empty string
   if (email === "" || password === "") {
     res.status(400).json({ message: "Provide email and password." });
     return;
   }
 
-  // Check the users collection if a user with the same email exists
   User.findOne({ email })
     .then((foundUser) => {
       if (!foundUser) {
-        // If the user is not found, send an error response
         res.status(401).json({ message: "User not found." });
         return;
       }
 
-      // Compare the provided password with the one saved in the database
       const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
 
       if (passwordCorrect) {
-        // Deconstruct the user object to omit the password
-        const { _id, email, name } = foundUser;
+        const { _id, email, name, isAdmin } = foundUser; // Include isAdmin in the destructuring
 
-        // Create an object that will be set as the token payload
-        const payload = { _id, email, name };
+        const payload = { _id, email, name, isAdmin }; // Include isAdmin in the JWT payload
 
-        // Create a JSON Web Token and sign it
-        const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
-          algorithm: "HS256",
-          expiresIn: "6h",
+        const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, 
+          { algorithm: "HS256", 
+          expiresIn: "6h" 
         });
 
-        // Send the token as the response
-        res.status(200).json({ authToken: authToken });
+
+        // Include isAdmin in the response for the frontend to use
+        res.status(200).json({ 
+          authToken: authToken, 
+          userId: _id, 
+          isAdmin // Include isAdmin in the response
+      
+        });
+        
+
       } else {
         res.status(401).json({ message: "Unable to authenticate the user" });
       }
     })
-    .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
+    .catch((err) => next(err));
 });
 
 
-// PUT :userId Updates the user's profile information. This endpoint requires authentication
 
+// PUT :userId Updates the user's profile information. This endpoint requires authentication
 router.put('/:userId', upload.single('photo'), isAuthenticated, async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.params; // Correctly access the userId parameter from the route
   const { username, password, email, name } = req.body;
 
   // Ensure the user is updating their own profile
@@ -148,7 +149,7 @@ router.put('/:userId', upload.single('photo'), isAuthenticated, async (req, res)
 
     // Include the photo URL from Cloudinary in the update, if a photo was uploaded
     if (req.file && req.file.path) {
-      updateData.photo = req.file.path; 
+      updateData.photo = req.file.path;
     }
 
     // Update the user in the database
@@ -166,7 +167,6 @@ router.put('/:userId', upload.single('photo'), isAuthenticated, async (req, res)
   }
 });
 
-module.exports = router;
 
 
 
